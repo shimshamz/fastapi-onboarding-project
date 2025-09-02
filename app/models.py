@@ -2,6 +2,10 @@ import uuid
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
+from datetime import datetime, timezone
+
+def get_utc_now() -> datetime:
+        return datetime.now(timezone.utc)
 
 # Shared properties
 class UserBase(SQLModel):
@@ -43,3 +47,44 @@ class Token(SQLModel):
 # Contents of JWT token
 class TokenPayload(SQLModel):
     sub: str | None = None
+
+# AcademicInstitution
+class AcademicInstitutionBase(SQLModel):
+    name: str = Field(index=True, max_length=255)
+    created_at: datetime = Field(default_factory=get_utc_now)
+
+class AcademicInstitution(AcademicInstitutionBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    students: list["Student"] = Relationship(back_populates="academic_institution")
+
+class AcademicInstitutionPublic(AcademicInstitutionBase):
+    id: uuid.UUID
+
+class AcademicInstitutionCreate(AcademicInstitutionBase):
+    pass
+
+class AcademicInstitutionPublicWithStudents(AcademicInstitutionPublic):
+    students: list["StudentPublic"] = []
+
+# Student
+class StudentBase(SQLModel):
+    name: str = Field(index=True, max_length=255)
+    enrollment_date: datetime = Field(default_factory=get_utc_now)
+
+class Student(StudentBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    academic_institution_id: uuid.UUID = Field(
+        foreign_key="academicinstitution.id", nullable=False, ondelete="CASCADE"
+    )
+    academic_institution: AcademicInstitution | None = Relationship(back_populates="students")
+
+class StudentPublic(StudentBase):
+    id: uuid.UUID
+
+class StudentCreate(StudentBase):
+    pass
+
+class StudentPublicWithAcademicInstitution(StudentPublic):
+    academic_institution: AcademicInstitutionPublic | None = None
