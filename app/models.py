@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 
 def get_utc_now() -> datetime:
         return datetime.now(timezone.utc)
@@ -51,10 +51,10 @@ class TokenPayload(SQLModel):
 # AcademicInstitution
 class AcademicInstitutionBase(SQLModel):
     name: str = Field(index=True, max_length=255)
-    created_at: datetime = Field(default_factory=get_utc_now)
 
 class AcademicInstitution(AcademicInstitutionBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=get_utc_now)
 
     students: list["Student"] = Relationship(back_populates="academic_institution")
 
@@ -67,13 +67,17 @@ class AcademicInstitutionCreate(AcademicInstitutionBase):
 class AcademicInstitutionPublicWithStudents(AcademicInstitutionPublic):
     students: list["StudentPublic"] = []
 
+class AcademicInstitutionsPublic(SQLModel):
+    data: list[AcademicInstitutionPublicWithStudents]
+    count: int
+
 # Student
 class StudentBase(SQLModel):
     name: str = Field(index=True, max_length=255)
-    enrollment_date: datetime = Field(default_factory=get_utc_now)
 
 class Student(StudentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    enrollment_date: datetime = Field(default_factory=get_utc_now)
 
     academic_institution_id: uuid.UUID = Field(
         foreign_key="academicinstitution.id", nullable=False, ondelete="CASCADE"
@@ -82,9 +86,14 @@ class Student(StudentBase, table=True):
 
 class StudentPublic(StudentBase):
     id: uuid.UUID
+    enrollment_date: datetime
 
 class StudentCreate(StudentBase):
     pass
 
 class StudentPublicWithAcademicInstitution(StudentPublic):
     academic_institution: AcademicInstitutionPublic | None = None
+
+class StudentsPublic(SQLModel):
+    data: list[StudentPublicWithAcademicInstitution]
+    count: int
