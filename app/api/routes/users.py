@@ -57,7 +57,7 @@ async def read_user_me(current_user: CurrentUser) -> Any:
     return current_user
 
 @router.patch("/me/password")
-def update_password_me(*, session: SessionDep, body: UpdatePassword, current_user: CurrentUser) -> Any:
+async def update_password_me(*, session: SessionDep, body: UpdatePassword, current_user: CurrentUser) -> Any:
     """
     Update own password.
     """

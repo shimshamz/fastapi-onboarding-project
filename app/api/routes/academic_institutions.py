@@ -25,7 +25,7 @@ from app.models import (
 
 router = APIRouter(prefix="/academic_institutions", tags=["academic institutions"])
 
-def verify_academic_institution(session, institution_id):
+async def verify_academic_institution(session, institution_id):
     academic_institution = crud.get_academic_institution_by_id(session=session, id=institution_id)
     if not academic_institution:
         raise HTTPException(status_code=404, detail="Academic Institution not found")
