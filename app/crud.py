@@ -4,7 +4,7 @@ from typing import Any
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import User, UserCreate
+from app.models import User, UserCreate, AcademicInstitution, AcademicInstitutionPublicWithStudents
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -29,3 +29,7 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     if not verify_password(password, db_user.hashed_password):
         return None
     return db_user
+
+def get_academic_institution_by_id(*, session: Session, id: uuid.UUID) -> AcademicInstitutionPublicWithStudents | None:
+    academic_institution = session.get(AcademicInstitution, id)
+    return academic_institution
