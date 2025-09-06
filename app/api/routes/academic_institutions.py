@@ -45,7 +45,7 @@ async def create_academic_institution(
     session.refresh(db_academic_institution)
     return db_academic_institution
 
-@router.get("/", response_model=AcademicInstitutionsPublic)
+@router.get("/", dependencies=[Depends(get_current_active_superuser)], response_model=AcademicInstitutionsPublic)
 async def read_academic_institutions(session: SessionDep, offset: int = 0, limit: int = 100) -> Any:
     """
     Retrieve Academic Institutions.
@@ -59,7 +59,7 @@ async def read_academic_institutions(session: SessionDep, offset: int = 0, limit
 
     return AcademicInstitutionsPublic(data=academic_institutions, count=count)
 
-@router.get("/{institution_id}", response_model=AcademicInstitutionPublicWithStudents)
+@router.get("/{institution_id}", dependencies=[Depends(get_current_active_superuser)], response_model=AcademicInstitutionPublicWithStudents)
 async def read_academic_institution(session: SessionDep, institution_id: uuid.UUID) -> Any:
     """
     Get Academic Institution by ID.
@@ -69,7 +69,7 @@ async def read_academic_institution(session: SessionDep, institution_id: uuid.UU
 
     return academic_institution
 
-@router.get("/{institution_id}/students", response_model=StudentsPublic)
+@router.get("/{institution_id}/students", dependencies=[Depends(get_current_active_superuser)], response_model=StudentsPublic)
 async def read_academic_institution_students(session: SessionDep, institution_id: uuid.UUID, offset: int = 0, limit: int = 100) -> Any:
     """
     Retrieve Students.
@@ -82,7 +82,7 @@ async def read_academic_institution_students(session: SessionDep, institution_id
 
     return StudentsPublic(data=students, count=count)
 
-@router.post("/{institution_id}/students", response_model=StudentPublic)
+@router.post("/{institution_id}/students", dependencies=[Depends(get_current_active_superuser)], response_model=StudentPublic)
 async def create_academic_institution_student(
     *, session: SessionDep, institution_id: uuid.UUID, student_in: StudentCreate
     ) -> Any:
@@ -98,7 +98,7 @@ async def create_academic_institution_student(
     session.refresh(db_student)
     return db_student
 
-@router.get("/{institution_id}/students/{student_id}", response_model=StudentPublicWithAcademicInstitution)
+@router.get("/{institution_id}/students/{student_id}", dependencies=[Depends(get_current_active_superuser)], response_model=StudentPublicWithAcademicInstitution)
 async def read_academic_institution_student(session: SessionDep, institution_id: uuid.UUID, student_id: uuid.UUID) -> Any:
     """
     Retrieve Student by ID.
@@ -110,9 +110,3 @@ async def read_academic_institution_student(session: SessionDep, institution_id:
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
     return student
-
-# 92f5c536-1045-4973-bac8-2c8cd93504fb
-
-# 1306af1c-970f-4566-b88b-fa629d10c582
-
-# 026059db-fadc-4e71-ba93-1fc06f446471

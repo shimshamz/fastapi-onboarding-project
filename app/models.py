@@ -74,10 +74,10 @@ class AcademicInstitutionsPublic(SQLModel):
 # Student
 class StudentBase(SQLModel):
     name: str = Field(index=True, max_length=255)
+    enrollment_date: date | None = None
 
 class Student(StudentBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    enrollment_date: datetime = Field(default_factory=get_utc_now)
 
     academic_institution_id: uuid.UUID = Field(
         foreign_key="academicinstitution.id", nullable=False, ondelete="CASCADE"
@@ -86,7 +86,6 @@ class Student(StudentBase, table=True):
 
 class StudentPublic(StudentBase):
     id: uuid.UUID
-    enrollment_date: datetime
 
 class StudentCreate(StudentBase):
     pass
